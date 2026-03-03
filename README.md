@@ -37,6 +37,8 @@ nvm use        # reads .nvmrc (Node 20)
 npm install
 ```
 
+> **Note:** `npm install` should complete without errors or `--legacy-peer-deps`. All dependency versions are aligned to Expo SDK 54 expectations.
+
 ### 2. Configure the API URL
 
 Copy the example env file and set your backend URL:
@@ -50,12 +52,26 @@ cp .env.example .env
 ### 3. Start the development server
 
 ```bash
-npx expo start
+npx expo start --clear
 ```
+
+The `--clear` flag wipes the Metro bundler cache, which avoids stale-cache issues after dependency changes.
 
 - Press **`i`** to open in iOS Simulator (requires Xcode on macOS).
 - Press **`a`** to open in Android Emulator.
 - Scan the QR code with the **Expo Go** app on a physical device.
+
+---
+
+## Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| `npm install` fails with peer-dependency errors | Make sure you are using Node 20 (`nvm use`). All deps are pinned to SDK 54 versions. |
+| `"main" has not been registered` at runtime | Ensure `package.json` has `"main": "expo/AppEntry"` (not `App.js`). |
+| Babel transform errors / missing preset | Run `npx expo start --clear` to reset the Metro cache. `babel-preset-expo` is now a declared `devDependency`. |
+| Stale Metro cache after upgrading packages | Run `npx expo start --clear` or delete the `.expo` folder and re-run. |
+| Still broken after the above | Delete `node_modules` and reinstall: `rm -rf node_modules && npm install && npx expo start --clear` |
 
 ---
 
@@ -123,7 +139,7 @@ Before submitting to App Store Connect:
 
 ```
 chess-analytics-ios/
-├── App.js               # Entry point (wraps src/App.jsx in SafeAreaProvider)
+├── App.js               # Root component (wraps src/App.jsx in SafeAreaProvider); loaded by expo/AppEntry
 ├── app.json             # Expo configuration
 ├── eas.json             # EAS Build profiles
 ├── babel.config.js
