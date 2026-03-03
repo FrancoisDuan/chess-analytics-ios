@@ -5,12 +5,17 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
     "splash": {
       "backgroundColor": "#1a1a2e"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.chessanalytics.ios"
+      "bundleIdentifier": "com.chessanalytics.ios",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSLocalNetworkUsageDescription": "Used to connect to a local Chess Analytics API server during development."
+      }
     },
     "android": {
       "adaptiveIcon": {
