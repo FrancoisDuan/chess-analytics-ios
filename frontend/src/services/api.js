@@ -1,12 +1,13 @@
 /**
  * Chess Analytics API client.
  *
- * All requests are proxied to the backend via Vite's dev-server proxy
- * (or a reverse-proxy in production). The base path is /api.
+ * The base URL is read from EXPO_PUBLIC_API_URL (set in a .env file).
+ * Example: EXPO_PUBLIC_API_URL=http://192.168.1.100:8000/api
  */
 import axios from 'axios'
+import API_URL from '../config'
 
-const api = axios.create({ baseURL: '/api' })
+const api = axios.create({ baseURL: API_URL })
 
 /**
  * Fetch games for a user.

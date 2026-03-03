@@ -1,12 +1,19 @@
 import { useState } from 'react'
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+} from 'react-native'
 import UserSearchForm from './components/UserSearchForm'
 import MoveTimeChart from './components/MoveTimeChart'
 import MoveTrendChart from './components/MoveTrendChart'
 import CompareChart from './components/CompareChart'
 import { getMoveTimeStats, getMoveTimeTrend, compareUsers } from './services/api'
-import './App.css'
 
-const TABS = ['Move Time Stats', 'Time Trend', 'Compare Users']
+const TABS = ['Move Time', 'Trend', 'Compare']
 
 export default function App() {
   const [tab, setTab] = useState(0)
@@ -60,55 +67,142 @@ export default function App() {
   }
 
   return (
-    <div className="app">
-      <header>
-        <h1>♟ Chess Analytics</h1>
-        <p className="subtitle">Explore how long players spend on each move</p>
-      </header>
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        <View style={styles.header}>
+          <Text style={styles.title}>♟ Chess Analytics</Text>
+          <Text style={styles.subtitle}>Explore how long players spend on each move</Text>
+        </View>
 
-      <nav className="tabs">
-        {TABS.map((t, i) => (
-          <button key={t} className={tab === i ? 'tab active' : 'tab'}
-            onClick={() => { setTab(i); setError(null) }}>{t}</button>
-        ))}
-      </nav>
+        <View style={styles.tabs}>
+          {TABS.map((t, i) => (
+            <TouchableOpacity
+              key={t}
+              style={[styles.tab, tab === i && styles.tabActive]}
+              onPress={() => { setTab(i); setError(null) }}
+            >
+              <Text style={[styles.tabText, tab === i && styles.tabTextActive]}>{t}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-      {error && <div className="error">{error}</div>}
+        {error ? (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : null}
 
-      {tab === 0 && (
-        <section>
-          <UserSearchForm onSubmit={handleStatsFetch} loading={loading} />
-          {statsData && <MoveTimeChart stats={statsData} title={`Move time stats — ${statsUsername}`} />}
-        </section>
-      )}
+        {tab === 0 && (
+          <View>
+            <UserSearchForm onSubmit={handleStatsFetch} loading={loading} />
+            {statsData ? (
+              <MoveTimeChart stats={statsData} title={`Move time stats — ${statsUsername}`} />
+            ) : null}
+          </View>
+        )}
 
-      {tab === 1 && (
-        <section>
-          <UserSearchForm onSubmit={handleTrendFetch} loading={loading} />
-          <div className="extra-field">
-            <label>
-              Track specific moves (comma-separated, e.g. <code>1,2,3</code>)
-              <input type="text" value={moveNumbers} onChange={e => setMoveNumbers(e.target.value)}
-                placeholder="leave blank for all moves" />
-            </label>
-          </div>
-          {trendData && <MoveTrendChart trend={trendData} title={`Time-per-move trend — ${trendUsername}`} />}
-        </section>
-      )}
+        {tab === 1 && (
+          <View>
+            <UserSearchForm
+              onSubmit={handleTrendFetch}
+              loading={loading}
+              extraField={{
+                label: 'Track specific moves (comma-separated, e.g. 1,2,3)',
+                value: moveNumbers,
+                onChange: setMoveNumbers,
+                placeholder: 'leave blank for all moves',
+              }}
+            />
+            {trendData ? (
+              <MoveTrendChart trend={trendData} title={`Time-per-move trend — ${trendUsername}`} />
+            ) : null}
+          </View>
+        )}
 
-      {tab === 2 && (
-        <section>
-          <UserSearchForm onSubmit={handleCompareFetch} loading={loading} label="Username 1" />
-          <div className="extra-field">
-            <label>
-              Username 2
-              <input type="text" value={compareUser2} onChange={e => setCompareUser2(e.target.value)}
-                placeholder="second chess.com username" />
-            </label>
-          </div>
-          {compareData && <CompareChart data={compareData} username1={compareUser1} username2={compareUser2} />}
-        </section>
-      )}
-    </div>
+        {tab === 2 && (
+          <View>
+            <UserSearchForm
+              onSubmit={handleCompareFetch}
+              loading={loading}
+              label="Username 1"
+              extraField={{
+                label: 'Username 2',
+                value: compareUser2,
+                onChange: setCompareUser2,
+                placeholder: 'second chess.com username',
+              }}
+            />
+            {compareData ? (
+              <CompareChart data={compareData} username1={compareUser1} username2={compareUser2} />
+            ) : null}
+          </View>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#1a1a2e',
+  },
+  scroll: {
+    padding: 16,
+    paddingBottom: 40,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#f0d9b5',
+    letterSpacing: 1,
+  },
+  subtitle: {
+    color: '#aaa',
+    marginTop: 4,
+    fontSize: 13,
+    textAlign: 'center',
+  },
+  tabs: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+    borderBottomWidth: 2,
+    borderBottomColor: '#333',
+    paddingBottom: 8,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderRadius: 4,
+    alignItems: 'center',
+  },
+  tabActive: {
+    backgroundColor: '#f0d9b5',
+  },
+  tabText: {
+    color: '#aaa',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  tabTextActive: {
+    color: '#1a1a2e',
+    fontWeight: '700',
+  },
+  errorBox: {
+    backgroundColor: '#5c1a1a',
+    borderWidth: 1,
+    borderColor: '#a33',
+    borderRadius: 4,
+    padding: 12,
+    marginBottom: 12,
+  },
+  errorText: {
+    color: '#ffcccc',
+  },
+})
